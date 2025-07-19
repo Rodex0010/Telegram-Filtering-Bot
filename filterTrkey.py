@@ -17,7 +17,7 @@ my_api_id = 25202058
 my_api_hash = 'ff6480cf0caf92223033f597401e5bf4'
 
 # توكن البوت اللي أنت عاوزه يشتغل كواجهة (من @BotFather)
-my_BOT_TOKEN = '1887695108:AAFa9-aK9qS8Y7cHXjb_Hw_-KbKgX787Zz8'# تأكد أن هذا التوكن هو بتاعك
+my_BOT_TOKEN = '1887695108:AAFLzc_KasLNKltLILSJoOQculfLYl9g8CU'# تأكد أن هذا التوكن هو بتاعك
 
 # معلومات المطور والقناة (للاستخدام في الخاص فقط)
 DEV_USERNAME = "developer: @x_4_f"  
@@ -70,7 +70,7 @@ def save_config():
 load_config()
 
 # إنشاء الكلاينت: سيعمل كـ Userbot (بصلاحيات حسابك) وسيستقبل الأوامر كبوت (بالتوكن)
-cli = TelegramClient("tito_session", my_api_id, my_api_hash).start(bot_token=BOT_TOKEN)
+cli = TelegramClient("tito_session", my_api_id, my_api_hash).start(bot_token=my_BOT_TOKEN)
 
 # إعدادات الحظر
 BAN_RIGHTS = ChatBannedRights(until_date=None, view_messages=True) # حظر دائم
