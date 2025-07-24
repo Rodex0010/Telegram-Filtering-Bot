@@ -24,7 +24,6 @@ DEV_USERNAME = "developer: @x_4_f"
 CHANNEL_LINK_DISPLAY_TEXT = "source" # النص اللي هيظهر للينك
 CHANNEL_LINK_URL = "https://t.me/ALTRKI_Story"
 
-
 # ==================== إعدادات المستخدمين المسموح لهم ====================
 # سيتم تحميل هذه القيم من ملف config.json
 ALLOWED_USER_IDS = []
