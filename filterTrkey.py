@@ -47,12 +47,15 @@ def load_config():
     except FileNotFoundError:
         print(f"{CONFIG_FILE} not found. Creating with default owner ID.")
         # تعيين الـ ID الخاص بك كمالك عند أول تشغيل إذا لم يوجد ملف الإعدادات
+        # **هنا لازم تحط الـ ID بتاعك كمالك البوت لو مكنتش حاطه قبل كده**
+        # **هذا الـ ID هو الأساسي الذي سيسمح لك بإدارة البوت من الخاص**
         ALLOWED_USER_IDS = [6258807551] # <<<<< تأكد أن هذا هو الـ ID الخاص بك كمالك
         ALLOWED_USERNAMES = []
         save_config() # حفظ الإعدادات الافتراضية
     except json.JSONDecodeError:
         print(f"Error decoding {CONFIG_FILE}. It might be corrupted. Creating new config.")
-        ALLOWED_USER_IDS = [6258807551]
+        # في حالة تلف الملف، يتم إعادة إنشائه بالـ ID الافتراضي للمالك
+        ALLOWED_USER_IDS = [6258807551] # <<<<< تأكد أن هذا هو الـ ID الخاص بك كمالك
         ALLOWED_USERNAMES = []
         save_config()
 
