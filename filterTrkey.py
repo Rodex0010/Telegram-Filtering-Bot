@@ -39,18 +39,18 @@ CHAT_INVITE_LINKS = {}
 # قاموس لتخزين رسائل البدء المؤقتة ليتم حذفها لاحقًا
 START_MESSAGES_TO_DELETE = {}
 
-# قائمة المستخدمين المسموح لهم باستخدام البوت (معرف المطور مضاف تلقائياً)
-# ملاحظة: هذه القائمة غير دائمة وستُمسح عند إعادة تشغيل البوت.
-# لجعلها دائمة، ستحتاج إلى حفظها في ملف أو قاعدة بيانات.
+# قائمة المستخدمين المصرح لهم باستخدام البوت (المطور يضاف تلقائيًا)
+# **هذه القائمة هي التي ستتحكم في من يمكنه استخدام أوامر 'تركي' و 'Dur'**
 AUTHORIZED_USERS = {my_api_id} 
 
 # --- وظائف مساعدة ---
 
 async def is_owner(user_id):
-    me = await cli.get_me()
-    return user_id == me.id
+    """التحقق مما إذا كان المستخدم هو مالك البوت (المطور)."""
+    return user_id == my_api_id
 
 async def is_authorized(user_id):
+    """التحقق مما إذا كان المستخدم مصرحًا له باستخدام البوت (مطور أو مشرف)."""
     return user_id in AUTHORIZED_USERS or await is_owner(user_id)
 
 # حظر مستخدم مع تجاوز FloodWait والأخطاء الشائعة
@@ -212,7 +212,7 @@ async def start_command(event):
 async def command_help_callback(event):
     await event.answer()
     await event.edit(
-        """🧠 *طريقة التشغيل:*
+        f"""🧠 *طريقة التشغيل:*
 
 - أرسل كلمة `تركي` في أي مجموعة وأنا مشرف فيها وسأبدأ التصفية فوراً.
 - أرسل `Dur` لإيقاف التصفية.
@@ -220,8 +220,9 @@ async def command_help_callback(event):
 📌 *ملاحظة هامة:* تأكد أن البوت لديه صلاحيات المشرف الكاملة و'حظر المستخدمين' و'حذف الرسائل' ليعمل بكفاءة.
 
 *أوامر إدارة المستخدمين (للمطور فقط):*
-- `/adduser <معرف_المستخدم>`: لإضافة مستخدم لقائمة السماح.
-- `/removeuser <معرف_المستخدم>`: لحذف مستخدم من قائمة السماح.
+- `/addadmin <معرف_المستخدم>`: لإضافة مستخدم لقائمة المشرفين (يمكنهم استخدام أوامر البدء والإيقاف).
+- `/removeadmin <معرف_المستخدم>`: لحذف مستخدم من قائمة المشرفين.
+- `/showadmins`: لعرض قائمة المشرفين الحاليين.
 """,
         buttons=[Button.inline("🔙 رجوع", b"back_to_start")]
     )
@@ -256,6 +257,7 @@ async def start_cleanup_command(event):
     if not event.is_group and not event.is_channel:
         return    
 
+    # التحقق مما إذا كان المستخدم مصرحًا له (مطور أو مشرف مضاف)
     if not await is_authorized(event.sender_id):
         print(f"User {event.sender_id} is not authorized to use the bot.")
         return # لا يرد على المستخدم في المجموعة إذا لم يكن مصرحاً له
@@ -317,6 +319,7 @@ async def stop_cleanup_command(event):
     if not event.is_group and not event.is_channel:
         pass 
 
+    # التحقق مما إذا كان المستخدم مصرحًا له (مطور أو مشرف مضاف)
     if not await is_authorized(event.sender_id):
         print(f"User {event.sender_id} is not authorized to stop the bot.")
         return # لا يرد على المستخدم في المجموعة إذا لم يكن مصرحاً له
@@ -346,9 +349,9 @@ async def stop_cleanup_command(event):
         print(f"No cleanup running in chat {chat_id} to stop.")
     pass 
 
-# أمر إضافة مستخدم لقائمة السماح
-@cli.on(events.NewMessage(pattern=r'/adduser (\d+)'))
-async def add_user_command(event):
+# أمر إضافة مشرف لقائمة السماح
+@cli.on(events.NewMessage(pattern=r'/addadmin (\d+)'))
+async def add_admin_command(event):
     if not await is_owner(event.sender_id):
         await event.reply("عذراً، هذا الأمر مخصص للمطور فقط.")
         return
@@ -356,14 +359,14 @@ async def add_user_command(event):
     try:
         user_id_to_add = int(event.pattern_match.group(1))
         AUTHORIZED_USERS.add(user_id_to_add)
-        await event.reply(f"تم إضافة المستخدم `{user_id_to_add}` إلى قائمة السماح.")
+        await event.reply(f"تم إضافة المستخدم `{user_id_to_add}` إلى قائمة المشرفين.")
         print(f"User {user_id_to_add} added to AUTHORIZED_USERS. Current list: {AUTHORIZED_USERS}")
     except ValueError:
-        await event.reply("صيغة الأمر خاطئة. الرجاء استخدام: `/adduser <معرف_المستخدم>`")
+        await event.reply("صيغة الأمر خاطئة. الرجاء استخدام: `/addadmin <معرف_المستخدم>`")
 
-# أمر حذف مستخدم من قائمة السماح
-@cli.on(events.NewMessage(pattern=r'/removeuser (\d+)'))
-async def remove_user_command(event):
+# أمر حذف مشرف من قائمة السماح
+@cli.on(events.NewMessage(pattern=r'/removeadmin (\d+)'))
+async def remove_admin_command(event):
     if not await is_owner(event.sender_id):
         await event.reply("عذراً، هذا الأمر مخصص للمطور فقط.")
         return
@@ -371,17 +374,27 @@ async def remove_user_command(event):
     try:
         user_id_to_remove = int(event.pattern_match.group(1))
         if user_id_to_remove == my_api_id: 
-            await event.reply("لا يمكنك حذف معرف المطور الخاص بك من قائمة السماح.")
+            await event.reply("لا يمكنك حذف معرف المطور الخاص بك من قائمة المشرفين.")
             return
 
         if user_id_to_remove in AUTHORIZED_USERS:
             AUTHORIZED_USERS.remove(user_id_to_remove)
-            await event.reply(f"تم حذف المستخدم `{user_id_to_remove}` من قائمة السماح.")
+            await event.reply(f"تم حذف المستخدم `{user_id_to_remove}` من قائمة المشرفين.")
             print(f"User {user_id_to_remove} removed from AUTHORIZED_USERS. Current list: {AUTHORIZED_USERS}")
         else:
-            await event.reply(f"المستخدم `{user_id_to_remove}` ليس موجوداً في قائمة السماح أصلاً.")
+            await event.reply(f"المستخدم `{user_id_to_remove}` ليس موجوداً في قائمة المشرفين أصلاً.")
     except ValueError:
-        await event.reply("صيغة الأمر خاطئة. الرجاء استخدام: `/removeuser <معرف_المستخدم>`")
+        await event.reply("صيغة الأمر خاطئة. الرجاء استخدام: `/removeadmin <معرف_المستخدم>`")
+
+# أمر عرض قائمة المشرفين
+@cli.on(events.NewMessage(pattern='/showadmins'))
+async def show_admins_command(event):
+    if not await is_owner(event.sender_id):
+        await event.reply("عذراً، هذا الأمر مخصص للمطور فقط.")
+        return
+    
+    admins_list = "\n".join([str(uid) for uid in AUTHORIZED_USERS])
+    await event.reply(f"قائمة المشرفين الحاليين (الـ IDs):\n```\n{admins_list}\n```")
 
 
 # عند انضمام عضو جديد (صامت تماماً في المجموعة)
