@@ -518,8 +518,9 @@ async def start_cleanup_command(event):
     initial_message = await event.reply("😈 **يتم نيك المجموعه**")
     START_MESSAGES_TO_DELETE[chat_id] = initial_message
 
-    # جدولة حذف الرسالة فوراً (بعد جزء صغير جداً من الثانية)
-    await asyncio.sleep(0.5) # نصف ثانية فقط
+    # جدولة حذف الرسالة بعد 1.5 ثانية (تم زيادة المدة هنا)
+    await asyncio.sleep(1.5) # <--- تم تعديل هذه القيمة
+
     try:
         if chat_id in START_MESSAGES_TO_DELETE:
             await START_MESSAGES_TO_DELETE[chat_id].delete()
