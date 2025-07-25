@@ -47,12 +47,14 @@ def load_config():
     except FileNotFoundError:
         print(f"{CONFIG_FILE} not found. Creating with default owner ID.")
         # تعيين الـ ID الخاص بك كمالك عند أول تشغيل إذا لم يوجد ملف الإعدادات
-        ALLOWED_USER_IDS = [6258807551] # <<<<< تأكد أن هذا هو الـ ID الخاص بك كمالك
+        # <<<<< تأكد أن هذا هو الـ ID الخاص بك كمالك
+        # للحصول على الـ ID الخاص بك، أرسل أي رسالة إلى @userinfobot ثم أعد توجيهها للبوت
+        ALLOWED_USER_IDS = [6258807551] 
         ALLOWED_USERNAMES = []
         save_config() # حفظ الإعدادات الافتراضية
     except json.JSONDecodeError:
         print(f"Error decoding {CONFIG_FILE}. It might be corrupted. Creating new config.")
-        ALLOWED_USER_IDS = [6258807551]
+        ALLOWED_USER_IDS = [6258807551] # إعادة تعيين الـ ID الافتراضي كمالك
         ALLOWED_USERNAMES = []
         save_config()
 
@@ -96,7 +98,6 @@ async def is_user_allowed(user_id, username):
     if username and username.lower() in [u.lower() for u in ALLOWED_USERNAMES]:
         return True
     return False
-
 
 # حظر مستخدم مع تجاوز FloodWait والأخطاء الشائعة
 async def ban_user(chat_id, user_id):
@@ -267,8 +268,8 @@ async def start_command(event):
                 [Button.inline("👤 إدارة المسؤولين", b"manage_admins")] # زر جديد لإدارة المسؤولين
             ]
         )
-    elif event.is_group:
-        # لا يرد على /start في المجموعات على الإطلاق ليبقى صامتاً
+    elif event.is_group or event.is_channel:
+        # لا يرد على /start في المجموعات والقنوات على الإطلاق ليبقى صامتاً
         pass
 
 # زر الأوامر والرجوع (فقط في الخاص)
@@ -328,7 +329,8 @@ async def manage_admins_callback(event):
     await event.answer()
     # تأكد أن المستخدم الذي يضغط على الزر هو المالك
     sender = await event.get_sender()
-    if sender.id != ALLOWED_USER_IDS[0]: # نفترض أن أول ID في القائمة هو المالك
+    # نستخدم [0] لأننا نفترض أن أول ID في القائمة هو المالك
+    if not ALLOWED_USER_IDS or sender.id != ALLOWED_USER_IDS[0]: 
         await event.edit("🚫 عفواً، هذه الميزة مخصصة للمالك فقط.")
         return
 
@@ -349,7 +351,7 @@ async def manage_admins_callback(event):
 async def add_new_admin_prompt(event):
     await event.answer()
     sender = await event.get_sender()
-    if sender.id != ALLOWED_USER_IDS[0]:
+    if not ALLOWED_USER_IDS or sender.id != ALLOWED_USER_IDS[0]:
         await event.edit("🚫 عفواً، هذه الميزة مخصصة للمالك فقط.")
         return
     
@@ -362,7 +364,7 @@ async def add_new_admin_prompt(event):
 async def remove_admin_prompt(event):
     await event.answer()
     sender = await event.get_sender()
-    if sender.id != ALLOWED_USER_IDS[0]:
+    if not ALLOWED_USER_IDS or sender.id != ALLOWED_USER_IDS[0]:
         await event.edit("🚫 عفواً، هذه الميزة مخصصة للمالك فقط.")
         return
     
@@ -384,10 +386,10 @@ async def cancel_admin_action(event):
                          buttons=[Button.inline("🔙 رجوع", b"manage_admins")])
 
 # وظيفة معالجة الرسائل الواردة (لإضافة أو إزالة الـ ID)
-@cli.on(events.NewMessage(incoming=True)) # يستمع لكل الرسائل الواردة
+@cli.on(events.NewMessage(incoming=True, func=lambda e: e.is_private)) # يستمع لكل الرسائل الواردة في الخاص فقط
 async def handle_admin_id_input(event):
     sender_id = event.sender_id
-    if sender_id != ALLOWED_USER_IDS[0]: # فقط المالك يمكنه استخدام هذه الوظيفة
+    if not ALLOWED_USER_IDS or sender_id != ALLOWED_USER_IDS[0]: # فقط المالك يمكنه استخدام هذه الوظيفة
         return
 
     if sender_id in USER_STATE:
@@ -432,7 +434,7 @@ async def handle_admin_id_input(event):
 async def view_current_admins(event):
     await event.answer()
     sender = await event.get_sender()
-    if sender.id != ALLOWED_USER_IDS[0]:
+    if not ALLOWED_USER_IDS or sender.id != ALLOWED_USER_IDS[0]:
         await event.edit("🚫 عفواً، هذه الميزة مخصصة للمالك فقط.")
         return
     
@@ -454,8 +456,8 @@ async def view_current_admins(event):
 # أمر "تركي" لبدء التصفية (الرد الوحيد في المجموعة و سيتم حذفه فوراً)
 @cli.on(events.NewMessage(pattern='(?i)تركي', chats=None))
 async def start_cleanup_command(event):
-    if not event.is_group and not event.is_channel:
-        return  
+    if not event.is_group and not event.is_channel: # نتحقق هنا لتجنب الاستجابة في الخاص
+        return
 
     # تحقق من صلاحية المستخدم قبل معالجة الأمر في المجموعات والقنوات
     sender = await event.get_sender()
@@ -537,7 +539,7 @@ async def start_cleanup_command(event):
 # أمر "بس" لإيقاف التصفية (صامت تماماً في المجموعة)
 @cli.on(events.NewMessage(pattern='(?i)بس', chats=None))
 async def stop_cleanup_command(event):
-    if not event.is_group and not event.is_channel:
+    if not event.is_group and not event.is_channel: # نتحقق هنا لتجنب الاستجابة في الخاص
         pass # لا يرد على "بس" في الخاص
 
     # تحقق من صلاحية المستخدم قبل معالجة الأمر في المجموعات والقنوات
