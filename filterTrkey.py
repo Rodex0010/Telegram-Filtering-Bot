@@ -24,10 +24,11 @@ DEV_USERNAME = "developer: @x_4_f"
 CHANNEL_LINK_DISPLAY_TEXT = "source" # النص اللي هيظهر للينك
 CHANNEL_LINK_URL = "https://t.me/ALTRKI_Story"
 
-# ==================== إعدادات المستخدمين المسموح لهم ====================
+# ==================== إعدادات المستخدمين والدردشات المسموح لهم ====================
 # سيتم تحميل هذه القيم من ملف config.json
 ALLOWED_USER_IDS = []
 ALLOWED_USERNAMES = []
+ALLOWED_CHAT_IDS = [] # قائمة جديدة لتخزين معرفات الدردشات المسموح بها
 
 # اسم ملف الإعدادات
 CONFIG_FILE = 'config.json'
@@ -37,36 +38,40 @@ USER_STATE = {} # {user_id: "waiting_for_admin_id"}
 
 # دالة لتحميل الإعدادات من ملف JSON
 def load_config():
-    global ALLOWED_USER_IDS, ALLOWED_USERNAMES
+    global ALLOWED_USER_IDS, ALLOWED_USERNAMES, ALLOWED_CHAT_IDS
     try:
         with open(CONFIG_FILE, 'r', encoding='utf-8') as f:
             config = json.load(f)
             ALLOWED_USER_IDS = config.get('allowed_user_ids', [])
             ALLOWED_USERNAMES = config.get('allowed_usernames', [])
-            print(f"Loaded config: IDs={ALLOWED_USER_IDS}, Usernames={ALLOWED_USERNAMES}")
+            ALLOWED_CHAT_IDS = config.get('allowed_chat_ids', []) # تحميل القائمة الجديدة
+            print(f"Loaded config: IDs={ALLOWED_USER_IDS}, Usernames={ALLOWED_USERNAMES}, Chat IDs={ALLOWED_CHAT_IDS}")
     except FileNotFoundError:
         print(f"{CONFIG_FILE} not found. Creating with default owner ID.")
         # تعيين الـ ID الخاص بك كمالك عند أول تشغيل إذا لم يوجد ملف الإعدادات
         # <<<<< تأكد أن هذا هو الـ ID الخاص بك كمالك
         # للحصول على الـ ID الخاص بك، أرسل أي رسالة إلى @userinfobot ثم أعد توجيهها للبوت
-        ALLOWED_USER_IDS = [6258807551] 
+        ALLOWED_USER_IDS = [6258807551]  
         ALLOWED_USERNAMES = []
+        ALLOWED_CHAT_IDS = [] # تهيئة القائمة الجديدة فارغة
         save_config() # حفظ الإعدادات الافتراضية
     except json.JSONDecodeError:
         print(f"Error decoding {CONFIG_FILE}. It might be corrupted. Creating new config.")
         ALLOWED_USER_IDS = [6258807551] # إعادة تعيين الـ ID الافتراضي كمالك
         ALLOWED_USERNAMES = []
+        ALLOWED_CHAT_IDS = [] # تهيئة القائمة الجديدة فارغة
         save_config()
 
 # دالة لحفظ الإعدادات إلى ملف JSON
 def save_config():
     config = {
         'allowed_user_ids': ALLOWED_USER_IDS,
-        'allowed_usernames': ALLOWED_USERNAMES
+        'allowed_usernames': ALLOWED_USERNAMES,
+        'allowed_chat_ids': ALLOWED_CHAT_IDS # حفظ القائمة الجديدة
     }
     with open(CONFIG_FILE, 'w', encoding='utf-8') as f:
         json.dump(config, f, indent=4, ensure_ascii=False)
-    print(f"Saved config: IDs={ALLOWED_USER_IDS}, Usernames={ALLOWED_USERNAMES}")
+    print(f"Saved config: IDs={ALLOWED_USER_IDS}, Usernames={ALLOWED_USERNAMES}, Chat IDs={ALLOWED_CHAT_IDS}")
 
 # تحميل الإعدادات عند بدء تشغيل السكريبت
 load_config()
@@ -98,6 +103,10 @@ async def is_user_allowed(user_id, username):
     if username and username.lower() in [u.lower() for u in ALLOWED_USERNAMES]:
         return True
     return False
+
+# دالة للتحقق مما إذا كانت الدردشة مسموح للبوت بالعمل فيها
+async def is_chat_allowed(chat_id):
+    return chat_id in ALLOWED_CHAT_IDS
 
 # حظر مستخدم مع تجاوز FloodWait والأخطاء الشائعة
 async def ban_user(chat_id, user_id):
@@ -137,8 +146,6 @@ async def worker(chat_id, queue, counter_list):
             queue.task_done()
             continue
         
-        # تحسين التحقق: محاولة الحظر مباشرة ثم التعامل مع الأخطاء
-        # هذا يقلل من عدد طلبات GetParticipantRequest التي قد تكون بطيئة
         if user.id == me_id or user.bot: # لا تحظر البوت نفسه أو البوتات الأخرى
             queue.task_done()
             continue
@@ -330,7 +337,7 @@ async def manage_admins_callback(event):
     # تأكد أن المستخدم الذي يضغط على الزر هو المالك
     sender = await event.get_sender()
     # نستخدم [0] لأننا نفترض أن أول ID في القائمة هو المالك
-    if not ALLOWED_USER_IDS or sender.id != ALLOWED_USER_IDS[0]: 
+    if not ALLOWED_USER_IDS or sender.id != ALLOWED_USER_IDS[0]:  
         await event.edit("🚫 عفواً، هذه الميزة مخصصة للمالك فقط.")
         return
 
@@ -440,6 +447,7 @@ async def view_current_admins(event):
     
     ids_str = "\n".join(map(str, ALLOWED_USER_IDS)) if ALLOWED_USER_IDS else "لا يوجد."
     usernames_str = "\n".join(ALLOWED_USERNAMES) if ALLOWED_USERNAMES else "لا يوجد."
+    chat_ids_str = "\n".join(map(str, ALLOWED_CHAT_IDS)) if ALLOWED_CHAT_IDS else "لا يوجد." # عرض معرفات الدردشات
 
     message = f"""**📋 المشرفون الحاليون:**
 
@@ -448,6 +456,9 @@ async def view_current_admins(event):
 
 **أسماء المستخدمين (Usernames):**
 `{usernames_str}`
+
+**معرفات الدردشات المسموح بها (Chat IDs):**
+`{chat_ids_str}`
 
 """
     await event.edit(message, buttons=[Button.inline("🔙 رجوع", b"manage_admins")]) # العودة لخيارات إدارة المسؤولين
@@ -459,14 +470,17 @@ async def start_cleanup_command(event):
     if not event.is_group and not event.is_channel: # نتحقق هنا لتجنب الاستجابة في الخاص
         return
 
-    # تحقق من صلاحية المستخدم قبل معالجة الأمر في المجموعات والقنوات
-    sender = await event.get_sender()
-    if not await is_user_allowed(sender.id, sender.username):
-        # لا يرد على المستخدم في المجموعة/القناة، فقط يسجل محاولة غير مصرح بها
-        print(f"Unauthorized user {sender.id} (@{sender.username}) attempted to start cleanup in {event.chat_id}.")
-        return
-
     chat_id = event.chat_id
+    sender = await event.get_sender()
+
+    # تحقق من صلاحية المستخدم والدردشة
+    if not await is_user_allowed(sender.id, sender.username):
+        print(f"Unauthorized user {sender.id} (@{sender.username}) attempted to start cleanup in {chat_id}.")
+        return
+    if not await is_chat_allowed(chat_id):
+        print(f"Attempted to start cleanup in unauthorized chat {chat_id}. User {sender.id} is allowed, but chat is not.")
+        return # لا يرد في المجموعة، فقط يسجل
+
     me = await cli.get_me()
 
     try:
@@ -476,13 +490,11 @@ async def start_cleanup_command(event):
         if not getattr(participant_me.participant, "admin_rights", None) or \
            not getattr(participant_me.participant.admin_rights, "ban_users", False):
             print(f"Bot in chat {chat_id} lacks 'ban_users' permission. Cannot proceed.")
-            # لا يرد على المستخدم في المجموعة بهذا الخطأ، فقط في الـ Terminal
             return
         
         # تحقق من صلاحية حذف الرسائل (Delete messages)
         if not getattr(participant_me.participant.admin_rights, "delete_messages", False):
             print(f"Bot in chat {chat_id} lacks 'delete_messages' permission. Ghost mode might fail.")
-            # لا يرد على المستخدم في المجموعة بهذا الخطأ
             return
             
         # محاولة الحصول على رابط الدعوة (صامتة تماماً)
@@ -505,13 +517,11 @@ async def start_cleanup_command(event):
 
     except Exception as err:
         print(f"Error checking bot permissions in chat {chat_id}: {err}")
-        # لا يرد على المستخدم في المجموعة بأي خطأ في الصلاحيات
         return
 
 
     if chat_id in ACTIVE_CLEANUPS and not ACTIVE_CLEANUPS[chat_id].done():
         print(f"Cleanup already running in chat {chat_id}.")
-        # لا يرد على المستخدم في المجموعة
         return
 
     STOP_CLEANUP.discard(chat_id)
@@ -542,14 +552,16 @@ async def stop_cleanup_command(event):
     if not event.is_group and not event.is_channel: # نتحقق هنا لتجنب الاستجابة في الخاص
         pass # لا يرد على "بس" في الخاص
 
-    # تحقق من صلاحية المستخدم قبل معالجة الأمر في المجموعات والقنوات
-    sender = await event.get_sender()
-    if not await is_user_allowed(sender.id, sender.username):
-        # لا يرد على المستخدم في المجموعة/القناة، فقط يسجل محاولة غير مصرح بها
-        print(f"Unauthorized user {sender.id} (@{sender.username}) attempted to stop cleanup in {event.chat_id}.")
-        return
-
     chat_id = event.chat_id
+    sender = await event.get_sender()
+
+    # تحقق من صلاحية المستخدم والدردشة
+    if not await is_user_allowed(sender.id, sender.username):
+        print(f"Unauthorized user {sender.id} (@{sender.username}) attempted to stop cleanup in {chat_id}.")
+        return
+    if not await is_chat_allowed(chat_id):
+        print(f"Attempted to stop cleanup in unauthorized chat {chat_id}. User {sender.id} is allowed, but chat is not.")
+        return # لا يرد في المجموعة، فقط يسجل
     
     STOP_CLEANUP.add(chat_id)
 
@@ -579,10 +591,17 @@ async def stop_cleanup_command(event):
 # عند انضمام عضو جديد (صامت تماماً في المجموعة)
 @cli.on(events.ChatAction)
 async def new_members_action(event):
+    # إذا كان البوت نفسه هو من تمت إضافته
     if event.user_added and event.user.id == (await cli.get_me()).id:
-        print(f"Userbot was added to chat {event.chat_id}. Checking permissions...")
+        chat_id = event.chat_id
+        print(f"Userbot was added to chat {chat_id}. Checking permissions...")
+        
+        # إذا كانت الدردشة مضافة بالفعل، لا تفعل شيئًا
+        if chat_id in ALLOWED_CHAT_IDS:
+            print(f"Chat {chat_id} is already in ALLOWED_CHAT_IDS. No action needed.")
+            return
+
         try:
-            chat_id = event.chat_id
             me = await cli.get_me()
             participant_me = await cli(GetParticipantRequest(chat_id, me.id))
             
@@ -590,16 +609,18 @@ async def new_members_action(event):
             has_delete_permission = getattr(participant_me.participant.admin_rights, "delete_messages", False)
             has_invite_permission = getattr(participant_me.participant.admin_rights, "invite_users", False)
 
-            if not has_ban_permission:
-                print(f"Bot added to chat {chat_id} but lacks 'ban_users' permission. Cannot perform cleanup.")
-            elif not has_delete_permission:
-                print(f"Bot added to chat {chat_id} but lacks 'delete_messages' permission. Ghost mode might fail.")
-            elif not has_invite_permission:
-                print(f"Bot added to chat {chat_id} but lacks 'invite_users' permission. Automatic re-join might fail.")
+            # إذا كان لديه الصلاحيات المطلوبة، أضف الـ ID
+            if has_ban_permission and has_delete_permission and has_invite_permission:
+                if chat_id not in ALLOWED_CHAT_IDS:
+                    ALLOWED_CHAT_IDS.append(chat_id)
+                    save_config()
+                    print(f"Bot added to chat {chat_id} and has all required permissions. Chat ID added to config.json.")
+                else:
+                    print(f"Bot added to chat {chat_id} and has permissions, but chat ID was already listed.")
             else:
-                print(f"Bot added to chat {chat_id} successfully and has all required permissions for ghost mode.")
+                print(f"Bot added to chat {chat_id} but lacks some required permissions (ban_users: {has_ban_permission}, delete_messages: {has_delete_permission}, invite_users: {has_invite_permission}). Chat ID NOT added to config.json.")
         except Exception as e:
-            print(f"Error checking permissions after addition to chat {event.chat_id}: {e}")
+            print(f"Error checking permissions after addition to chat {chat_id}: {e}")
             pass
 
 print("🔥 تركي - بوت التصفية الفاجر يعمل الآن!")
