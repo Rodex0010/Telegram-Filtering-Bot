@@ -1,4 +1,7 @@
 {
-    "allowed_user_ids": [6258807551],
-    "allowed_usernames": []
+    "allowed_user_ids": [
+        6258807551
+    ],
+    "allowed_usernames": [],
+    "allowed_chat_ids": []
 }
