@@ -12,19 +12,22 @@ import asyncio, time
 # ============== بيانات الدخول والإعدادات ==============
 # الـ API ID والـ API Hash الخاصين بحسابك الشخصي (Userbot)
 # **تأكد أن هذه القيم صحيحة من my.telegram.org**
-my_api_id = 25202058 # تم تحديث الـ API ID
-my_api_hash = 'ff6480cf0caf92223033f597401e5bf4' # تم تحديث الـ API Hash
+# تم تحديث أسماء المتغيرات هنا لـ my_api_id و my_api_hash
+my_api_id = 25202058 
+my_api_hash = 'ff6480cf0caf92223033f597401e5bf4' 
 
 # توكن البوت اللي أنت عاوزه يشتغل كواجهة (من @BotFather)
-my_BOT_TOKEN = '1887695108:AAFLzc_KasLNKltLILSJoOQculfLYl9g8CU' # تم تحديث توكن البوت
+# تم تحديث اسم المتغير هنا لـ my_BOT_TOKEN
+my_BOT_TOKEN = '1887695108:AAFLzc_KasLNKltLILSJoOQculfLYl9g8CU' 
 
 # معلومات المطور والقناة (للاستخدام في الخاص فقط)
-DEV_USERNAME = "developer: @x_4_f" # تم تحديث يوزر المطور
-CHANNEL_LINK_DISPLAY_TEXT = "source" # تم تحديث نص لينك القناة
-CHANNEL_LINK_URL = "https://t.me/ALTRKI_Story" # تم تحديث لينك القناة
+DEV_USERNAME = "developer: @x_4_f" 
+CHANNEL_LINK_DISPLAY_TEXT = "source" 
+CHANNEL_LINK_URL = "https://t.me/ALTRKI_Story"
 
 # إنشاء الكلاينت: سيعمل كـ Userbot (بصلاحيات حسابك) وسيستقبل الأوامر كبوت (بالتوكن)
-cli = TelegramClient("tito_session", api_id, api_hash).start(bot_token=BOT_TOKEN)
+# استخدام المتغيرات المحدثة هنا
+cli = TelegramClient("tito_session", my_api_id, my_api_hash).start(bot_token=my_BOT_TOKEN)
 
 # إعدادات الحظر
 BAN_RIGHTS = ChatBannedRights(until_date=None, view_messages=True) # حظر دائم
@@ -42,7 +45,8 @@ START_MESSAGES_TO_DELETE = {}
 # قائمة المستخدمين المسموح لهم باستخدام البوت (معرف المطور مضاف تلقائياً)
 # ملاحظة: هذه القائمة غير دائمة وستُمسح عند إعادة تشغيل البوت.
 # لجعلها دائمة، ستحتاج إلى حفظها في ملف أو قاعدة بيانات.
-AUTHORIZED_USERS = {api_id} 
+# استخدام المتغير المحدث هنا
+AUTHORIZED_USERS = {my_api_id} 
 
 # --- وظائف مساعدة ---
 
@@ -354,7 +358,8 @@ async def stop_cleanup_command(event):
     pass 
 
 # أمر إضافة مستخدم لقائمة السماح
-@cli.on(events.NewMessage(pattern='/adduser (\d+)'))
+# تم إضافة 'r' قبل النمط هنا
+@cli.on(events.NewMessage(pattern=r'/adduser (\d+)'))
 async def add_user_command(event):
     if not await is_owner(event.sender_id):
         await event.reply("عذراً، هذا الأمر مخصص للمطور فقط.")
@@ -369,7 +374,8 @@ async def add_user_command(event):
         await event.reply("صيغة الأمر خاطئة. الرجاء استخدام: `/adduser <معرف_المستخدم>`")
 
 # أمر حذف مستخدم من قائمة السماح
-@cli.on(events.NewMessage(pattern='/removeuser (\d+)'))
+# تم إضافة 'r' قبل النمط هنا
+@cli.on(events.NewMessage(pattern=r'/removeuser (\d+)'))
 async def remove_user_command(event):
     if not await is_owner(event.sender_id):
         await event.reply("عذراً، هذا الأمر مخصص للمطور فقط.")
@@ -377,7 +383,8 @@ async def remove_user_command(event):
 
     try:
         user_id_to_remove = int(event.pattern_match.group(1))
-        if user_id_to_remove == api_id: # منع المطور من حذف نفسه
+        # استخدام my_api_id هنا لمنع المطور من حذف نفسه
+        if user_id_to_remove == my_api_id: 
             await event.reply("لا يمكنك حذف معرف المطور الخاص بك من قائمة السماح.")
             return
 
@@ -418,8 +425,8 @@ async def new_members_action(event):
             pass
 
 print("🔥 تيتو - بوت التصفية الفاجر يعمل الآن!")
-print(f"البوت يعمل بالتوكن: {BOT_TOKEN}")
-print(f"الحساب يعمل بالـ API ID: {api_id}")
+print(f"البوت يعمل بالتوكن: {my_BOT_TOKEN}") # استخدام my_BOT_TOKEN هنا
+print(f"الحساب يعمل بالـ API ID: {my_api_id}") # استخدام my_api_id هنا
 print(f"المستخدمون المصرح لهم حالياً: {AUTHORIZED_USERS}")
 
 cli.run_until_disconnected()
