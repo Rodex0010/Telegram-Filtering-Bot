@@ -50,7 +50,7 @@ def load_config():
         print(f"{CONFIG_FILE} not found. Creating with default owner ID.")
         # تعيين الـ ID الخاص بك كمالك عند أول تشغيل إذا لم يوجد ملف الإعدادات
         # <<<<< تأكد أن هذا هو الـ ID الخاص بك كمالك
-        # للحصول على الـ ID الخاص بك، أرسل أي رسالة إلى @userinfobot ثم أعد توجيهها للبوت
+        # للحصول على الـ ID الخاص بك، أرسل أي رسالة من حسابك إلى @userinfobot ثم أعد توجيهها للبوت
         ALLOWED_USER_IDS = [6258807551]  
         ALLOWED_USERNAMES = []
         ALLOWED_CHAT_IDS = [] # تهيئة القائمة الجديدة فارغة
