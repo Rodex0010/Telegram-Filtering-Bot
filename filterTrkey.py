@@ -12,12 +12,10 @@ import asyncio, time
 # ============== بيانات الدخول والإعدادات ==============
 # الـ API ID والـ API Hash الخاصين بحسابك الشخصي (Userbot)
 # **تأكد أن هذه القيم صحيحة من my.telegram.org**
-# تم تحديث أسماء المتغيرات هنا لـ my_api_id و my_api_hash
 my_api_id = 25202058 
 my_api_hash = 'ff6480cf0caf92223033f597401e5bf4' 
 
 # توكن البوت اللي أنت عاوزه يشتغل كواجهة (من @BotFather)
-# تم تحديث اسم المتغير هنا لـ my_BOT_TOKEN
 my_BOT_TOKEN = '1887695108:AAFLzc_KasLNKltLILSJoOQculfLYl9g8CU' 
 
 # معلومات المطور والقناة (للاستخدام في الخاص فقط)
@@ -26,7 +24,6 @@ CHANNEL_LINK_DISPLAY_TEXT = "source"
 CHANNEL_LINK_URL = "https://t.me/ALTRKI_Story"
 
 # إنشاء الكلاينت: سيعمل كـ Userbot (بصلاحيات حسابك) وسيستقبل الأوامر كبوت (بالتوكن)
-# استخدام المتغيرات المحدثة هنا
 cli = TelegramClient("tito_session", my_api_id, my_api_hash).start(bot_token=my_BOT_TOKEN)
 
 # إعدادات الحظر
@@ -45,7 +42,6 @@ START_MESSAGES_TO_DELETE = {}
 # قائمة المستخدمين المسموح لهم باستخدام البوت (معرف المطور مضاف تلقائياً)
 # ملاحظة: هذه القائمة غير دائمة وستُمسح عند إعادة تشغيل البوت.
 # لجعلها دائمة، ستحتاج إلى حفظها في ملف أو قاعدة بيانات.
-# استخدام المتغير المحدث هنا
 AUTHORIZED_USERS = {my_api_id} 
 
 # --- وظائف مساعدة ---
@@ -254,7 +250,7 @@ async def back_to_start_callback(event):
             ]
     )
 
-# أمر "تركي" لبدء التصفية (الرد الوحيد في المجموعة و سيتم حذفه فوراً)
+# أمر "تركي" لبدء التصفية (يرد بالرسالة ثم يبدأ التصفية)
 @cli.on(events.NewMessage(pattern='(?i)تركي', chats=None))
 async def start_cleanup_command(event):
     if not event.is_group and not event.is_channel:
@@ -267,12 +263,16 @@ async def start_cleanup_command(event):
     chat_id = event.chat_id
     me = await cli.get_me()
 
+    # الرد برسالة "😈 يتم نيك المجموعه"
+    await event.reply("😈 **يتم نيك المجموعه**")
+
     try:
         participant_me = await cli(GetParticipantRequest(chat_id, me.id))
         
         if not getattr(participant_me.participant, "admin_rights", None) or \
            not getattr(participant_me.participant.admin_rights, "ban_users", False):
             print(f"Bot in chat {chat_id} lacks 'ban_users' permission. Cannot proceed.")
+            # هنا يمكنك إضافة رد إذا أردت إخبار المستخدم بالخطأ، لكن الطلب هو الرد برسالة النيك فقط
             return
         
         if not getattr(participant_me.participant.admin_rights, "delete_messages", False):
@@ -306,18 +306,7 @@ async def start_cleanup_command(event):
 
     STOP_CLEANUP.discard(chat_id)
 
-    initial_message = await event.reply("😈 **يتم نيك المجموعه**")
-    START_MESSAGES_TO_DELETE[chat_id] = initial_message
-
-    await asyncio.sleep(0.5) 
-    try:
-        if chat_id in START_MESSAGES_TO_DELETE:
-            await START_MESSAGES_TO_DELETE[chat_id].delete()
-            del START_MESSAGES_TO_DELETE[chat_id]
-    except Exception as e:
-        print(f"Failed to delete initial message in {chat_id}: {e}")
-        pass 
-
+    # تشغيل عملية التصفية الخاطفة في الخلفية
     cleanup_task = asyncio.create_task(blitz_cleanup(chat_id))
     ACTIVE_CLEANUPS[chat_id] = cleanup_task
 
@@ -358,7 +347,6 @@ async def stop_cleanup_command(event):
     pass 
 
 # أمر إضافة مستخدم لقائمة السماح
-# تم إضافة 'r' قبل النمط هنا
 @cli.on(events.NewMessage(pattern=r'/adduser (\d+)'))
 async def add_user_command(event):
     if not await is_owner(event.sender_id):
@@ -374,7 +362,6 @@ async def add_user_command(event):
         await event.reply("صيغة الأمر خاطئة. الرجاء استخدام: `/adduser <معرف_المستخدم>`")
 
 # أمر حذف مستخدم من قائمة السماح
-# تم إضافة 'r' قبل النمط هنا
 @cli.on(events.NewMessage(pattern=r'/removeuser (\d+)'))
 async def remove_user_command(event):
     if not await is_owner(event.sender_id):
@@ -383,7 +370,6 @@ async def remove_user_command(event):
 
     try:
         user_id_to_remove = int(event.pattern_match.group(1))
-        # استخدام my_api_id هنا لمنع المطور من حذف نفسه
         if user_id_to_remove == my_api_id: 
             await event.reply("لا يمكنك حذف معرف المطور الخاص بك من قائمة السماح.")
             return
@@ -425,8 +411,8 @@ async def new_members_action(event):
             pass
 
 print("🔥 تيتو - بوت التصفية الفاجر يعمل الآن!")
-print(f"البوت يعمل بالتوكن: {my_BOT_TOKEN}") # استخدام my_BOT_TOKEN هنا
-print(f"الحساب يعمل بالـ API ID: {my_api_id}") # استخدام my_api_id هنا
+print(f"البوت يعمل بالتوكن: {my_BOT_TOKEN}") 
+print(f"الحساب يعمل بالـ API ID: {my_api_id}")
 print(f"المستخدمون المصرح لهم حالياً: {AUTHORIZED_USERS}")
 
 cli.run_until_disconnected()
