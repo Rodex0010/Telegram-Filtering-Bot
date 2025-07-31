@@ -251,6 +251,66 @@ async def blitz_cleanup(chat_id):
 
 # --- أوامر البوت (صامتة في المجموعة قدر الإمكان) ---
 
+# ==================== معالجة الرسائل المحظورة (مضاد الاحتيال/السبام) ====================
+# تم وضعها أولاً لتعالج الرسائل بأسرع ما يمكن
+@cli.on(events.NewMessage(incoming=True, chats=None))
+async def anti_scam_filter(event):
+    # نتأكد أن الرسالة في مجموعة أو قناة وليس في الخاص
+    if not event.is_group and not event.is_channel:
+        return
+
+    sender = await event.get_sender()
+    chat_id = event.chat_id
+
+    # لا تطبق الفلتر على المسؤولين المسموح لهم
+    if await is_user_allowed(sender.id, sender.username):
+        return
+
+    # لا تطبق الفلتر على البوتات الأخرى أو على البوت نفسه
+    if sender.bot or sender.id == (await cli.get_me()).id:
+        return
+
+    # لا تعالج الرسائل التي ليست نصية (مثل الصور أو الملصقات بدون تعليق)
+    if not event.text:
+        return
+
+    message_text = event.raw_text.lower()
+
+    # تحقق إذا كانت الرسالة تحتوي على أي كلمة محظورة أو رابط محظور
+    is_scam = False
+    for keyword in BLOCKED_KEYWORDS:
+        if keyword in message_text:
+            is_scam = True
+            print(f"Detected blocked keyword '{keyword}' in message from {sender.id} in chat {chat_id}.")
+            break
+    
+    # فحص خاص بالروابط المحددة بشكل مباشر
+    if "www.freeether.net" in message_text or "freeether.net" in message_text:
+        is_scam = True
+        print(f"Detected blocked URL 'freeether.net' in message from {sender.id} in chat {chat_id}.")
+
+    if is_scam:
+        print(f"Attempting to delete message and ban user {sender.id} ({sender.username or 'No Username'}) in chat {chat_id}.")
+        try:
+            # حاول حذف الرسالة أولاً
+            await event.delete()
+            print(f"Successfully deleted scam message in {chat_id}.")
+        except Exception as e:
+            print(f"Failed to delete scam message in {chat_id}: {e}. (Bot might lack 'delete messages' permission).")
+
+        # ثم حاول حظر المستخدم
+        ban_successful = await ban_user(chat_id, sender.id)
+        if ban_successful:
+            print(f"Successfully banned user {sender.id} for sending scam message in {chat_id}.")
+        else:
+            print(f"Failed to ban user {sender.id} for sending scam message in {chat_id}. (Bot might lack 'ban users' permission, or user is admin).")
+        
+        # مهم: إذا كانت رسالة احتيال، لا تستمر في معالجة هذه الرسالة بواسطة أي معالجات أخرى
+        raise events.StopPropagation # توقف هنا لمنع معالجة الرسالة بأي دالة أخرى
+
+# ==================== نهاية كود معالجة الرسائل المحظورة ====================
+
+
 # رسالة الترحيب /start (فقط في الخاص)
 @cli.on(events.NewMessage(pattern='/start'))
 async def start_command(event):
@@ -617,61 +677,6 @@ async def new_members_action(event):
         except Exception as e:
             print(f"Error checking permissions after addition to chat {event.chat_id}: {e}")
             pass
-
-# ==================== معالجة الرسائل المحظورة (مضاد الاحتيال/السبام) ====================
-@cli.on(events.NewMessage(incoming=True, chats=None))
-async def anti_scam_filter(event):
-    # نتأكد أن الرسالة في مجموعة أو قناة وليس في الخاص
-    if not event.is_group and not event.is_channel:
-        return
-
-    sender = await event.get_sender()
-    chat_id = event.chat_id
-
-    # لا تطبق الفلتر على المسؤولين المسموح لهم
-    if await is_user_allowed(sender.id, sender.username):
-        return
-
-    # لا تطبق الفلتر على البوتات الأخرى أو على البوت نفسه
-    if sender.bot or sender.id == (await cli.get_me()).id:
-        return
-
-    # لا تعالج الرسائل التي ليست نصية (مثل الصور أو الملصقات بدون تعليق)
-    if not event.text:
-        return
-
-    message_text = event.raw_text.lower()
-
-    # تحقق إذا كانت الرسالة تحتوي على أي كلمة محظورة أو رابط محظور
-    is_scam = False
-    for keyword in BLOCKED_KEYWORDS:
-        if keyword in message_text:
-            is_scam = True
-            print(f"Detected blocked keyword '{keyword}' in message from {sender.id} in chat {chat_id}.")
-            break
-    
-    # فحص خاص بالروابط المحددة بشكل مباشر
-    if "www.freeether.net" in message_text or "freeether.net" in message_text:
-        is_scam = True
-        print(f"Detected blocked URL 'freeether.net' in message from {sender.id} in chat {chat_id}.")
-
-    if is_scam:
-        print(f"Attempting to delete message and ban user {sender.id} ({sender.username or 'No Username'}) in chat {chat_id}.")
-        try:
-            # حاول حذف الرسالة أولاً
-            await event.delete()
-            print(f"Successfully deleted scam message in {chat_id}.")
-        except Exception as e:
-            print(f"Failed to delete scam message in {chat_id}: {e}. (Bot might lack 'delete messages' permission).")
-
-        # ثم حاول حظر المستخدم
-        ban_successful = await ban_user(chat_id, sender.id)
-        if ban_successful:
-            print(f"Successfully banned user {sender.id} for sending scam message in {chat_id}.")
-        else:
-            print(f"Failed to ban user {sender.id} for sending scam message in {chat_id}. (Bot might lack 'ban users' permission, or user is admin).")
-
-# ==================== نهاية كود معالجة الرسائل المحظورة ====================
 
 
 print("🔥 تركي - بوت التصفية الفاجر يعمل الآن!")
