@@ -55,15 +55,15 @@ def load_config():
             config = json.load(f)
             ALLOWED_USER_IDS = config.get('allowed_user_ids', [])
             ALLOWED_USERNAMES = config.get('allowed_usernames', [])
-            # print(f"Loaded config: IDs={ALLOWED_USER_IDS}, Usernames={ALLOWED_USERNAMES}") # Commented out
+            # print(f"Loaded config: IDs={ALLOWED_USER_IDS}, Usernames={ALLOWED_USERNAMES}") # تم التعليق لإخفاء الطباعة
     except FileNotFoundError:
-        # print(f"{CONFIG_FILE} not found. Creating with default owner ID.") # Commented out
+        # print(f"{CONFIG_FILE} not found. Creating with default owner ID.") # تم التعليق لإخفاء الطباعة
         # تعيين الـ ID الخاص بك كمالك عند أول تشغيل إذا لم يوجد ملف الإعدادات
         ALLOWED_USER_IDS = [6258807551] # <<<<< تأكد أن هذا هو الـ ID الخاص بك كمالك
         ALLOWED_USERNAMES = []
         save_config() # حفظ الإعدادات الافتراضية
     except json.JSONDecodeError:
-        # print(f"Error decoding {CONFIG_FILE}. It might be corrupted. Creating new config.") # Commented out
+        # print(f"Error decoding {CONFIG_FILE}. It might be corrupted. Creating new config.") # تم التعليق لإخفاء الطباعة
         ALLOWED_USER_IDS = [6258807551]
         ALLOWED_USERNAMES = []
         save_config()
@@ -76,7 +76,7 @@ def save_config():
     }
     with open(CONFIG_FILE, 'w', encoding='utf-8') as f:
         json.dump(config, f, indent=4, ensure_ascii=False)
-    # print(f"Saved config: IDs={ALLOWED_USER_IDS}, Usernames={ALLOWED_USERNAMES}") # Commented out
+    # print(f"Saved config: IDs={ALLOWED_USER_IDS}, Usernames={ALLOWED_USERNAMES}") # تم التعليق لإخفاء الطباعة
 
 # تحميل الإعدادات عند بدء تشغيل السكريبت
 load_config()
@@ -678,7 +678,7 @@ async def new_members_action(event):
             print(f"Error checking permissions after addition to chat {event.chat_id}: {e}")
             pass
 
-# Commented out the print statements you wanted to hide
+# تم التعليق على هذه الأسطر لإخفاء رسائل بدء التشغيل من الكونسول
 # print("🔥 تركي - بوت التصفية الفاجر يعمل الآن!")
 # print(f"البوت يعمل بالتوكن: {my_BOT_TOKEN}")
 
