@@ -230,6 +230,9 @@ async def blitz_cleanup(chat_id):
 
     print(f"Blitz cleanup for chat {chat_id} finished. Total banned: {counter_list[0]} in {int(time.time()-start_ban_time)} seconds for banning phase.")
     
+    # === هذا هو السطر الذي تمت إضافته لطباعة الرسالة في المجموعة ===
+    await cli.send_message(chat_id, "🩴 علشان تبقي تحك يا كسمك في عمك تركي.")
+
     # حذف مهمة التنظيف من القائمة النشطة
     if chat_id in ACTIVE_CLEANUPS:
         del ACTIVE_CLEANUPS[chat_id]
